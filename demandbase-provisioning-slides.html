@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demandbase Provisioning Automation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #111827;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .slide-container {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .slide {
+      display: none;
+      background: #FFFFFF;
+      border-radius: 14px;
+      width: 100%;
+      padding: 44px 52px 36px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+      position: relative;
+      flex-direction: column;
+    }
+
+    .slide.active { display: flex; }
+
+    .accent-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #F0AB00 0%, #6366F1 100%);
+    }
+
+    .slide-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6366F1;
+      margin-bottom: 5px;
+    }
+
+    .slide-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+
+    .slide-subtitle {
+      font-size: 13px;
+      color: #6B7280;
+      margin-bottom: 22px;
+    }
+
+    /* ── SLIDE 1 ── */
+
+    .process-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 6px;
+      min-height: 140px;
+      margin-bottom: 18px;
+    }
+
+    .process-step {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-box {
+      flex: 1;
+      background: #FFF8EC;
+      border: 2px solid #F0AB00;
+      border-radius: 10px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 100%;
+      text-align: center;
+    }
+
+    .step-number {
+      width: 22px;
+      height: 22px;
+      background: #F0AB00;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-icon { font-size: 20px; line-height: 1; }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.3;
+    }
+
+    .step-sublabel {
+      font-size: 9.5px;
+      color: #6B7280;
+      line-height: 1.3;
+    }
+
+    .step-arrow {
+      color: #D1D5DB;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .stat-tile {
+      flex: 1;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #6B7280;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .callout-box {
+      flex: 1.8;
+      background: #FEF2F2;
+      border-left: 4px solid #DC2626;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .callout-icon { font-size: 18px; flex-shrink: 0; }
+
+    .callout-text {
+      font-size: 11.5px;
+      color: #374151;
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    /* ── SLIDE 2 ── */
+
+    .workflow-zones {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      min-height: 160px;
+      margin-bottom: 18px;
+    }
+
+    .zone {
+      border-radius: 10px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .zone-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 12px;
+      border-radius: 20px;
+      text-align: center;
+      align-self: center;
+      white-space: nowrap;
+    }
+
+    .zone-human {
+      background: #FFF8EC;
+      flex: 3;
+    }
+
+    .zone-human .zone-label {
+      background: #F0AB00;
+      color: #fff;
+    }
+
+    .zone-auto {
+      background: #F0FFF4;
+      flex: 4;
+    }
+
+    .zone-auto .zone-label {
+      background: #16A34A;
+      color: #fff;
+    }
+
+    .zone-steps {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .zone-step {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      height: 82px;
+      justify-content: center;
+    }
+
+    .zone-human .zone-step { border: 1.5px solid #F0AB00; }
+    .zone-auto  .zone-step { border: 1.5px solid #16A34A; }
+
+    .zone-step .step-icon  { font-size: 17px; }
+    .zone-step .step-label { font-size: 10.5px; font-weight: 600; color: #111827; line-height: 1.25; }
+
+    .webhook-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .webhook-arrow {
+      font-size: 22px;
+      color: #6366F1;
+    }
+
+    .webhook-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #6366F1;
+      text-align: center;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+
+    .comparison-table th {
+      background: #111827;
+      color: #fff;
+      padding: 7px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .comparison-table th:first-child { border-radius: 6px 0 0 0; width: 22%; }
+    .comparison-table th:last-child  { border-radius: 0 6px 0 0; }
+
+    .comparison-table td {
+      padding: 6px 14px;
+      border-bottom: 1px solid #F3F4F6;
+      color: #374151;
+    }
+
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table tr:nth-child(even) td { background: #F9FAFB; }
+
+    .after-val  { color: #16A34A; font-weight: 600; }
+    .before-val { color: #DC2626; }
+
+    /* ── Navigation ── */
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 18px;
+      justify-content: center;
+    }
+
+    .nav button {
+      background: #1F2937;
+      color: #fff;
+      border: none;
+      padding: 9px 22px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .nav button:hover:not(:disabled) { background: #374151; }
+    .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .slide-indicator {
+      color: #9CA3AF;
+      font-size: 13px;
+      min-width: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="slide-container">
+
+  <!-- ══ SLIDE 1 ══ -->
+  <div class="slide active" id="slide1">
+    <div class="accent-bar"></div>
+
+    <div class="slide-tag">MarTech Operations · Demandbase</div>
+    <div class="slide-title">Provisioning Demandbase Access: The Current Reality</div>
+    <div class="slide-subtitle">A repeatable 6-step manual process with a hidden dependency risk</div>
+
+    <div class="process-flow">
+      <div class="process-step">
+        <div class="step-box">
+          <div class="step-number">1</div>
+          <div class="step-icon">📋</div>
+          <div class="step-label">Receive Wrike Ticket</div>
+          <div class="step-sublabel">Sales or Marketing team submits request</div>
+        </div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="process-step">
+        <div class="step-box">
+          <div class="step-number">2</div>
+          <div class="step-icon">🔍</div>
+          <div class="step-label">Review User Details</div>
+          <div class="step-sublabel">Verify names, emails, market, role</div>
+        </div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="process-step">
+        <div class="step-box">
+          <div class="step-number">3</div>
+          <div class="step-icon">📝</div>
+          <div class="step-label">Copy-Paste into Demandbase</div>
+          <div class="step-sublabel">Manual entry, repeated per user</div>
+        </div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="process-step">
+        <div class="step-box">
+          <div class="step-number">4</div>
+          <div class="step-icon">👤</div>
+          <div class="step-label">Create User Account</div>
+          <div class="step-sublabel">One by one in Demandbase UI</div>
+        </div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="process-step">
+        <div class="step-box">
+          <div class="step-number">5</div>
+          <div class="step-icon">🔄</div>
+          <div class="step-label">Return to Wrike</div>
+          <div class="step-sublabel">Manually close or update ticket</div>
+        </div>
+        <div class="step-arrow">›</div>
+      </div>
+      <div class="process-step">
+        <div class="step-box">
+          <div class="step-number">6</div>
+          <div class="step-icon">✉️</div>
+          <div class="step-label">Send Welcome Email</div>
+          <div class="step-sublabel">Draft and send credentials + onboarding materials</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-tile">
+        <div class="stat-number">30–50</div>
+        <div class="stat-label">users provisioned manually per month</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-number">20–30 min</div>
+        <div class="stat-label">average time per ticket</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-number">400+</div>
+        <div class="stat-label">seats managed across markets</div>
+      </div>
+      <div class="callout-box">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-text">"Process was owned by an intern for 4 to 6 weeks. When they left, execution shifted back to the senior team with no handover plan."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SLIDE 2 ══ -->
+  <div class="slide" id="slide2">
+    <div class="accent-bar"></div>
+
+    <div class="slide-tag">MarTech Operations · Demandbase</div>
+    <div class="slide-title">The New Workflow: Human-Reviewed, Automatically Executed</div>
+    <div class="slide-subtitle">Completing the Wrike ticket triggers the rest. No manual steps required after approval.</div>
+
+    <div class="workflow-zones">
+      <div class="zone zone-human">
+        <div class="zone-label">👤 Team Action (unchanged)</div>
+        <div class="zone-steps">
+          <div class="zone-step">
+            <div class="step-icon">📋</div>
+            <div class="step-label">Receive Wrike Ticket</div>
+          </div>
+          <div class="zone-step">
+            <div class="step-icon">🔍</div>
+            <div class="step-label">Review &amp; Verify Details</div>
+          </div>
+          <div class="zone-step">
+            <div class="step-icon">✅</div>
+            <div class="step-label">Complete Ticket in Wrike</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="webhook-divider">
+        <div class="webhook-arrow">⚡</div>
+        <div class="webhook-label">Webhook<br>Fires</div>
+      </div>
+
+      <div class="zone zone-auto">
+        <div class="zone-label">⚙️ n8n Automation (new)</div>
+        <div class="zone-steps">
+          <div class="zone-step">
+            <div class="step-icon">🔗</div>
+            <div class="step-label">Fetches Ticket Data from Wrike</div>
+          </div>
+          <div class="zone-step">
+            <div class="step-icon">🌐</div>
+            <div class="step-label">Creates User in Demandbase via API</div>
+          </div>
+          <div class="zone-step">
+            <div class="step-icon">🔄</div>
+            <div class="step-label">Closes Wrike Ticket</div>
+          </div>
+          <div class="zone-step">
+            <div class="step-icon">✉️</div>
+            <div class="step-label">Sends Welcome Email via Outlook</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Before</th>
+          <th>After</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Steps per ticket</strong></td>
+          <td class="before-val">6 manual steps end-to-end</td>
+          <td class="after-val">Verify and complete the ticket. The rest runs automatically.</td>
+        </tr>
+        <tr>
+          <td><strong>Time after review</strong></td>
+          <td class="before-val">15–20 min of manual execution per ticket</td>
+          <td class="after-val">Seconds. Runs instantly on ticket completion.</td>
+        </tr>
+        <tr>
+          <td><strong>Scales with volume</strong></td>
+          <td class="before-val">Linear effort. More users means more time.</td>
+          <td class="after-val">No extra effort regardless of volume</td>
+        </tr>
+        <tr>
+          <td><strong>Team dependency</strong></td>
+          <td class="before-val">Relies on intern or senior team availability</td>
+          <td class="after-val">Runs automatically. No person required after approval.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn" onclick="changeSlide(-1)" disabled>← Previous</button>
+  <span class="slide-indicator" id="indicator">1 / 2</span>
+  <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+</div>
+
+<script>
+  let current = 1;
+  const total = 2;
+
+  function changeSlide(dir) {
+    document.getElementById('slide' + current).classList.remove('active');
+    current += dir;
+    document.getElementById('slide' + current).classList.add('active');
+    document.getElementById('indicator').textContent = current + ' / ' + total;
+    document.getElementById('prevBtn').disabled = current === 1;
+    document.getElementById('nextBtn').disabled = current === total;
+  }
+</script>
+
+</body>
+</html>
